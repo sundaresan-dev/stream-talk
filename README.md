@@ -29,13 +29,9 @@ StreamTalk uses PeerJS to establish WebRTC connections between browsers. The app
 
 No installation needed! StreamTalk runs directly in the browser:
 
-1. Open the [live demo](#) *(add your deployment link here)*
+1. Open the [live demo](#) *(https://sundaresan-dev.github.io/stream-talk/)*
 2. Your unique 4-digit ID will be displayed
 3. Share your ID with a friend or enter theirs to connect
 4. Start chatting!
 
-For local development:
-```bash
-git clone https://github.com/your-username/streamtalk.git
-cd streamtalk
-# Open index.html in your browser
+
