@@ -264,6 +264,35 @@
       text-decoration: none;
       color: #ffe600;
     }
+
+    /* New styles for name feature */
+    .message-sender {
+      font-weight: bold;
+      margin-bottom: 4px;
+      font-size: 0.8rem;
+    }
+
+    .message.sent .message-sender {
+      display: none;
+    }
+
+    .message-text {
+      word-wrap: break-word;
+    }
+
+    #user-name {
+      width: 100%;
+      padding: 8px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.2);
+      color: white;
+      margin: 8px 0;
+    }
+
+    #user-name::placeholder {
+      color: rgba(255,255,255,0.7);
+    }
   
     @media (max-width: 600px) {
       body {
@@ -294,32 +323,33 @@
       }
     }
   </style>
-  
 </head>
 <body>
   <div class="container">
     <div id="chat">
       <div class="header">
-  <h2>StreamTalk</h2>
-  <div class="connection-status">
-    <div class="status-indicator">
-      <div class="status-dot"></div>
-      <span id="status-text">Disconnected</span>
-    </div>
-    <span id="my-id">ID: ...</span>
-  </div>
-  <pre> </pre>
-  <span>
-    Brought to life by 
-    <a href="https://github.com/sundaresan-dev" target="_blank" rel="noopener noreferrer">
-      sundaresan.dev
-    </a>
-  </span>
-</div>
+        <h2>StreamTalk</h2>
+        <input type="text" id="user-name" placeholder="Enter your name">
+        <div class="connection-status">
+          <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span id="status-text">Disconnected</span>
+          </div>
+          <span id="my-id">ID: ...</span>
+        </div>
+        <pre> </pre>
+        <span>
+          Brought to life by 
+          <a href="https://github.com/sundaresan-dev" target="_blank" rel="noopener noreferrer">
+            sundaresan.dev
+          </a>
+        </span>
+      </div>
       
       <div id="messages">
         <div class="empty-state">
-<img src="https://cdn-icons-png.flaticon.com/512/1144/1144760.png" alt="Chat" style="width: 100; height: auto; vertical-align: middle; margin-right: 8px;">          <h3>Start a conversation</h3>
+          <img src="https://cdn-icons-png.flaticon.com/512/1144/1144760.png" alt="Chat" style="width: 100; height: auto; vertical-align: middle; margin-right: 8px;">
+          <h3>Start a conversation</h3>
           <p>Connect with a chat by entering their ID above</p>
         </div>
       </div>
@@ -351,6 +381,7 @@
   const peer = new Peer(myCustomId); // Set the 4-digit custom ID
   let conn;
   let typingTimeout;
+  let userName = 'Anonymous';
   
   // DOM elements
   const myIdSpan = document.getElementById('my-id');
@@ -364,6 +395,12 @@
   const messageForm = document.querySelector('.message-form');
   const typingIndicator = document.getElementById('typing-indicator');
   const emptyState = document.querySelector('.empty-state');
+  const userNameInput = document.getElementById('user-name');
+  
+  // Set up name input
+  userNameInput.addEventListener('change', () => {
+    userName = userNameInput.value.trim() || 'Anonymous';
+  });
   
   // PeerJS events
   peer.on('open', id => {
@@ -401,17 +438,18 @@
   
   function setupConnection() {
     conn.on('open', () => {
-  updateStatus(`Connected to ${conn.peer}`, 'connected');
-  connectIdInput.disabled = true;
-  connectBtn.disabled = true;
-  messageForm.style.display = 'grid';
-  document.querySelector('.connection-form').style.display = 'none'; // 👈 Hides the connection bar
-  if (emptyState) emptyState.style.display = 'none';
-});
+      updateStatus(`Connected to ${conn.peer}`, 'connected');
+      connectIdInput.disabled = true;
+      connectBtn.disabled = true;
+      messageForm.style.display = 'grid';
+      document.querySelector('.connection-form').style.display = 'none';
+      if (emptyState) emptyState.style.display = 'none';
+      addSystemMessage('You are now connected!', true);
+    });
 
     conn.on('data', data => {
       if (data.type === 'message') {
-        addMessage(data.text, 'received');
+        addMessage(data.text, 'received', data.sender);
       } else if (data.type === 'typing') {
         showTypingIndicator();
       }
@@ -429,27 +467,28 @@
       console.error('Connection error:', err);
       updateStatus('Connection error', 'error');
     });
-    function addSystemMessage(text, centered = false) {
-  if (emptyState) emptyState.style.display = 'none';
-
-  const systemDiv = document.createElement('div');
-  systemDiv.className = 'message system';
-  systemDiv.textContent = text;
-  systemDiv.style.textAlign = 'center';
-  systemDiv.style.color = '#64748b';
-  systemDiv.style.backgroundColor = 'transparent';
-  systemDiv.style.border = 'none';
-  systemDiv.style.fontSize = '0.85rem';
-  systemDiv.style.margin = '10px 0';
-
-  if (centered) {
-    systemDiv.style.alignSelf = 'center';
   }
+  
+  function addSystemMessage(text, centered = false) {
+    if (emptyState) emptyState.style.display = 'none';
 
-  messagesDiv.appendChild(systemDiv);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
-  }  
+    const systemDiv = document.createElement('div');
+    systemDiv.className = 'message system';
+    systemDiv.textContent = text;
+    systemDiv.style.textAlign = 'center';
+    systemDiv.style.color = '#64748b';
+    systemDiv.style.backgroundColor = 'transparent';
+    systemDiv.style.border = 'none';
+    systemDiv.style.fontSize = '0.85rem';
+    systemDiv.style.margin = '10px 0';
+
+    if (centered) {
+      systemDiv.style.alignSelf = 'center';
+    }
+
+    messagesDiv.appendChild(systemDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
   
   // Send message
   sendBtn.onclick = sendMessage;
@@ -469,14 +508,18 @@
   function sendMessage() {
     const msg = messageInput.value.trim();
     if (conn && msg) {
-      conn.send({ type: 'message', text: msg });
+      conn.send({ 
+        type: 'message', 
+        text: msg,
+        sender: userName
+      });
       addMessage(msg, 'sent');
       messageInput.value = '';
     }
   }
   
   // UI functions
-  function addMessage(text, type) {
+  function addMessage(text, type, sender = null) {
     if (emptyState) emptyState.style.display = 'none';
     
     const messageDiv = document.createElement('div');
@@ -485,8 +528,12 @@
     const now = new Date();
     const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
+    const senderHtml = type === 'received' && sender ? 
+      `<div class="message-sender">${sender}</div>` : '';
+    
     messageDiv.innerHTML = `
-      ${text}
+      ${senderHtml}
+      <div class="message-text">${text}</div>
       <span class="message-time">${timeString}</span>
     `;
     
@@ -494,26 +541,6 @@
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   }
   
-  function addSystemMessage(text) {
-  if (emptyState) emptyState.style.display = 'none';
-
-  const systemDiv = document.createElement('div');
-  systemDiv.className = 'message system';
-  systemDiv.textContent = text;
-
-  systemDiv.style.display = 'flex';
-  systemDiv.style.justifyContent = 'center';
-  systemDiv.style.color = '#64748b';
-  systemDiv.style.backgroundColor = 'transparent';
-  systemDiv.style.border = 'none';
-  systemDiv.style.fontSize = '0.85rem';
-  systemDiv.style.margin = '10px 0';
-  systemDiv.style.alignSelf = 'center';
-
-  messagesDiv.appendChild(systemDiv);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
-
   function showTypingIndicator() {
     typingIndicator.style.display = 'block';
     
@@ -539,6 +566,6 @@
         break;
     }
   }
-</script>
+  </script>
 </body>
 </html>
