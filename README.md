@@ -1,8 +1,7 @@
 # StreamTalk - Peer-to-Peer Web Chat Application
 
 ![StreamTalk Screenshot](screenshot.png) 
-*(Screenshot placeholder - replace with your actual screenshot)*
-
+Chat Now [Open](https://sundaresan-dev.github.io/stream-talk/) 
 StreamTalk is a lightweight, browser-based peer-to-peer chat application that allows users to connect directly without servers. Built with PeerJS, it features colorful gradients, message history, typing indicators, and customizable usernames.
 
 ## Features ✨
