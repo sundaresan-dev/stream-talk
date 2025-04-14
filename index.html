@@ -397,8 +397,6 @@
   messageForm.style.display = 'grid';
   document.querySelector('.connection-form').style.display = 'none'; // 👈 Hides the connection bar
   if (emptyState) emptyState.style.display = 'none';
-
-  addSystemMessage(`Connected to chat: ${conn.peer}`);
 });
 
     conn.on('data', data => {
