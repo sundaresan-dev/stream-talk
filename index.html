@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stream Talk</title>
+  <title>TalkRush</title>
   <style>
     :root {
       --primary: #4361ee;
@@ -390,17 +390,6 @@
   };
   
   function setupConnection() {
-    conn.on('open', () => {
-      updateStatus(`Connected to ${conn.peer}`, 'connected');
-      connectIdInput.disabled = true;
-      connectBtn.disabled = true;
-      messageForm.style.display = 'grid';
-      document.querySelector('.connection-form').style.display = 'none';
-
-      if (emptyState) emptyState.style.display = 'none';
-      
-      addSystemMessage(`Connected to chat: ${conn.peer}`);
-    });
     conn.on('open', () => {
   updateStatus(`Connected to ${conn.peer}`, 'connected');
   connectIdInput.disabled = true;
